@@ -369,16 +369,35 @@
               </div>
               <div class="field">
                 <label>Área <span class="req">*</span></label>
-                <input type="text" id="area" list="areaList" placeholder="Ej. Ensamble, Pintura, Corte..." required>
-                <datalist id="areaList"></datalist>
+                <select id="area" required>
+                  <option value="" disabled selected>Selecciona un área</option>
+                  <option value="Producción">Producción</option>
+                  <option value="Logística">Logística</option>
+                  <option value="Comercial">Comercial</option>
+                  <option value="SAC">SAC</option>
+                  <option value="Garantía">Garantía</option>
+                  <option value="Sistemas">Sistemas</option>
+                </select>
               </div>
             </div>
 
             <div class="field-row">
               <div class="field">
                 <label>Línea de producción</label>
-                <input type="text" id="lineaProduccion" list="lineaList" placeholder="Ej. Línea 1, Línea 2...">
-                <datalist id="lineaList"></datalist>
+                <select id="lineaProduccion">
+                  <option value="" selected>Selecciona una línea</option>
+                  <option value="Enrollable">Enrollable</option>
+                  <option value="Sheer">Sheer</option>
+                  <option value="Panel">Panel</option>
+                  <option value="Onda">Onda</option>
+                  <option value="Películas">Películas</option>
+                  <option value="Vertical">Vertical</option>
+                  <option value="Hospitalaria">Hospitalaria</option>
+                  <option value="Claraboya">Claraboya</option>
+                  <option value="Exteriores">Exteriores</option>
+                  <option value="Horizontal">Horizontal</option>
+                  <option value="Motor">Motor</option>
+                </select>
               </div>
               <div class="field">
                 <label>Ciudad</label>
@@ -555,6 +574,34 @@
   var STORAGE_KEY = "garantias_registro_v1";
   var CM_KEY = "garantias_contramedidas_v1";
 
+  var COLOMBIA_CIUDADES = [
+    "Bogotá, Distrito Capital","Medellín, Antioquia","Cali, Valle del Cauca","Barranquilla, Atlántico",
+    "Cartagena, Bolívar","Cúcuta, Norte de Santander","Soledad, Atlántico","Ibagué, Tolima",
+    "Bucaramanga, Santander","Soacha, Cundinamarca","Santa Marta, Magdalena","Villavicencio, Meta",
+    "Bello, Antioquia","Valledupar, Cesar","Pereira, Risaralda","Montería, Córdoba","Manizales, Caldas",
+    "Pasto, Nariño","Neiva, Huila","Palmira, Valle del Cauca","Buenaventura, Valle del Cauca",
+    "Itagüí, Antioquia","Armenia, Quindío","Popayán, Cauca","Sincelejo, Sucre","Floridablanca, Santander",
+    "Envigado, Antioquia","Tuluá, Valle del Cauca","Dosquebradas, Risaralda","Barrancabermeja, Santander",
+    "Cartago, Valle del Cauca","Tunja, Boyacá","Girardot, Cundinamarca","Girón, Santander",
+    "Apartadó, Antioquia","Turbo, Antioquia","Uribia, La Guajira","Riohacha, La Guajira",
+    "Quibdó, Chocó","Rionegro, Antioquia","Sogamoso, Boyacá","Duitama, Boyacá","Facatativá, Cundinamarca",
+    "Zipaquirá, Cundinamarca","Chía, Cundinamarca","Fusagasugá, Cundinamarca","Yopal, Casanare",
+    "Arauca, Arauca","Florencia, Caquetá","San José del Guaviare, Guaviare","Mocoa, Putumayo",
+    "Mitú, Vaupés","Puerto Carreño, Vichada","Leticia, Amazonas","San Andrés, San Andrés y Providencia",
+    "Inírida, Guainía","Magangué, Bolívar","Ipiales, Nariño","Tumaco, Nariño","Maicao, La Guajira",
+    "Ciénaga, Magdalena","El Carmen de Bolívar, Bolívar","Lorica, Córdoba","Sahagún, Córdoba",
+    "Chinú, Córdoba","Ocaña, Norte de Santander","Pamplona, Norte de Santander","Piedecuesta, Santander",
+    "San Gil, Santander","Málaga, Santander","Aguachica, Cesar","La Dorada, Caldas","Chinchiná, Caldas",
+    "Cajicá, Cundinamarca","Madrid, Cundinamarca","Mosquera, Cundinamarca","Funza, Cundinamarca",
+    "Ubaté, Cundinamarca","Guaduas, Cundinamarca","Honda, Tolima","Espinal, Tolima","Chaparral, Tolima",
+    "Líbano, Tolima","Melgar, Tolima","Garzón, Huila","Pitalito, Huila","La Plata, Huila",
+    "Santander de Quilichao, Cauca","Puerto Tejada, Cauca","Corozal, Sucre","San Marcos, Sucre",
+    "Codazzi, Cesar","La Jagua de Ibirico, Cesar","Yumbo, Valle del Cauca","Jamundí, Valle del Cauca",
+    "Candelaria, Valle del Cauca","Zarzal, Valle del Cauca","Sevilla, Valle del Cauca",
+    "Caicedonia, Valle del Cauca","Calarcá, Quindío","La Tebaida, Quindío","Montenegro, Quindío",
+    "La Virginia, Risaralda","Santa Rosa de Cabal, Risaralda"
+  ];
+
   // ---------- Persistence helpers ----------
   function loadRecords(){
     try{
@@ -729,12 +776,13 @@
       var vals = Array.from(new Set(records.map(function(r){ return r[key]; }).filter(Boolean)));
       el.innerHTML = vals.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join("");
     }
-    fill("areaList","area");
     fill("causanteList","causante");
     fill("defectoList","defecto");
     fill("tipoList","tipoGarantia");
-    fill("lineaList","lineaProduccion");
-    fill("ciudadList","ciudad");
+
+    var usedCiudades = records.map(function(r){ return r.ciudad; }).filter(Boolean);
+    var allCiudades = Array.from(new Set(COLOMBIA_CIUDADES.concat(usedCiudades))).sort(function(a,b){ return a.localeCompare(b,"es"); });
+    document.getElementById("ciudadList").innerHTML = allCiudades.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join("");
   }
 
   // ---------- Tab 1: consulta list ----------
