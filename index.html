@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Garantías</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF1EC;
+    --surface:#FFFFFF;
+    --surface-2:#F6F8F4;
+    --ink:#1C231F;
+    --ink-soft:#57625A;
+    --border:#D6DBD3;
+    --border-strong:#B8C0B4;
+    --accent:#1F6F63;
+    --accent-dark:#164F46;
+    --accent-ink:#FFFFFF;
+    --flag:#9C4221;
+    --flag-bg:#F5E6DE;
+    --warn:#C98A2C;
+    --warn-bg:#FBF0DC;
+    --shadow: 0 1px 2px rgba(20,26,20,0.06);
+    --radius: 6px;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark){
+      --bg:#151A16;
+      --surface:#1D231E;
+      --surface-2:#232A24;
+      --ink:#EAEFE9;
+      --ink-soft:#A7B2A4;
+      --border:#333D33;
+      --border-strong:#465045;
+      --accent:#4FA593;
+      --accent-dark:#6CC0AD;
+      --accent-ink:#0E1512;
+      --flag:#E0916C;
+      --flag-bg:#3A2620;
+      --warn:#E3B564;
+      --warn-bg:#3A2F16;
+      --shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#151A16;
+    --surface:#1D231E;
+    --surface-2:#232A24;
+    --ink:#EAEFE9;
+    --ink-soft:#A7B2A4;
+    --border:#333D33;
+    --border-strong:#465045;
+    --accent:#4FA593;
+    --accent-dark:#6CC0AD;
+    --accent-ink:#0E1512;
+    --flag:#E0916C;
+    --flag-bg:#3A2620;
+    --warn:#E3B564;
+    --warn-bg:#3A2F16;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    font-size:14.5px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+
+  a{color:var(--accent-dark);}
+
+  /* ---------- Header ---------- */
+  .app{ max-width:1200px; margin:0 auto; padding:22px 20px 60px; }
+  header.topbar{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:16px; padding-bottom:16px; margin-bottom:0;
+    border-bottom:2px solid var(--ink);
+    flex-wrap:wrap;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:40px;height:40px; border:2px solid var(--ink); border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px; flex:none; background:var(--surface);
+  }
+  .brand h1{ font-size:19px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+  .brand p{ margin:1px 0 0; font-size:12.5px; color:var(--ink-soft); }
+  .topbar-stats{ display:flex; gap:22px; align-items:flex-end; }
+  .stat{ text-align:right; }
+  .stat .num{ font-family:'IBM Plex Mono'; font-size:22px; font-weight:600; line-height:1; }
+  .stat .lbl{ font-size:11px; color:var(--ink-soft); margin-top:3px; }
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    display:flex; gap:2px; margin-top:0; border-bottom:1px solid var(--border-strong);
+  }
+  nav.tabs button{
+    font-family:inherit; font-size:13.5px; font-weight:600; color:var(--ink-soft);
+    background:transparent; border:none; border-bottom:3px solid transparent;
+    padding:13px 18px 11px; cursor:pointer; display:flex; align-items:center; gap:8px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  nav.tabs button .n{
+    font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-soft);
+    border:1px solid var(--border-strong); border-radius:3px; padding:1px 5px;
+  }
+  nav.tabs button:hover{ color:var(--ink); }
+  nav.tabs button.active{ color:var(--ink); border-bottom-color:var(--accent); }
+  nav.tabs button.active .n{ color:var(--accent-dark); border-color:var(--accent); }
+
+  main.sheet{
+    background:var(--surface); border:1px solid var(--border-strong); border-top:none;
+    padding:28px; min-height:420px;
+  }
+  .panel{ display:none; }
+  .panel.active{ display:block; animation:fade .18s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;} }
+
+  h2.section-title{ font-size:16px; margin:0 0 4px; font-weight:700; }
+  p.section-sub{ margin:0 0 20px; color:var(--ink-soft); font-size:13px; }
+
+  /* ---------- Layout tab 1 ---------- */
+  .grid-2{ display:grid; grid-template-columns: 1.05fr 0.95fr; gap:32px; }
+  @media (max-width: 860px){ .grid-2{ grid-template-columns:1fr; } }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; }
+  .field label .req{ color:var(--flag); }
+  .field input, .field select, .field textarea{
+    width:100%; font-family:inherit; font-size:14px; color:var(--ink);
+    background:var(--surface-2); border:1px solid var(--border-strong); border-radius:var(--radius);
+    padding:9px 10px; outline:none; transition:border-color .12s ease, background .12s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--accent); background:var(--surface);
+  }
+  .field textarea{ min-height:78px; resize:vertical; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .form-actions{ display:flex; gap:10px; align-items:center; margin-top:18px; }
+  button.btn{
+    font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
+    border-radius:var(--radius); padding:10px 18px; border:1px solid transparent;
+    transition:background .12s ease, border-color .12s ease, opacity .12s ease;
+  }
+  .btn-primary{ background:var(--accent); color:var(--accent-ink); }
+  .btn-primary:hover{ background:var(--accent-dark); }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); border-color:var(--border-strong); }
+  .btn-ghost:hover{ color:var(--ink); border-color:var(--ink); }
+  .btn-small{ padding:5px 10px; font-size:12px; }
+  .btn-danger{ background:transparent; color:var(--flag); border-color:var(--flag); }
+  .btn-danger:hover{ background:var(--flag-bg); }
+
+  .edit-banner{
+    display:none; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--warn-bg); border:1px solid var(--warn); color:#6b4c14; border-radius:var(--radius);
+    padding:9px 12px; font-size:12.5px; margin-bottom:16px;
+  }
+  :root[data-theme="dark"] .edit-banner, :root:not([data-theme="light"]) .edit-banner { color: var(--warn); }
+  .edit-banner.show{ display:flex; }
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:var(--bg); padding:11px 20px; border-radius:5px;
+    font-size:13px; font-weight:500; opacity:0; pointer-events:none; transition:all .25s ease;
+    z-index:50; box-shadow:0 6px 20px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---------- Consulta / listado ---------- */
+  .search-box{ position:relative; margin-bottom:14px; }
+  .search-box input{
+    width:100%; padding:9px 10px 9px 32px; border:1px solid var(--border-strong);
+    border-radius:var(--radius); background:var(--surface-2); font-family:inherit; font-size:14px; color:var(--ink);
+  }
+  .search-box input:focus{ outline:none; border-color:var(--accent); background:var(--surface); }
+  .search-box::before{
+    content:"⌕"; position:absolute; left:10px; top:50%; transform:translateY(-50%);
+    color:var(--ink-soft); font-size:16px;
+  }
+
+  .record-list{ display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto; padding-right:2px; }
+  .record-card{
+    border:1px solid var(--border); border-radius:var(--radius); padding:11px 13px;
+    background:var(--surface-2); cursor:pointer; transition:border-color .12s ease;
+  }
+  .record-card:hover{ border-color:var(--accent); }
+  .record-card .top-row{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .record-card .num{ font-family:'IBM Plex Mono'; font-weight:600; font-size:13px; }
+  .record-card .date{ font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--ink-soft); }
+  .record-card .area-pill{
+    display:inline-block; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.03em;
+    padding:2px 7px; border-radius:3px; background:var(--accent); color:var(--accent-ink); margin-top:6px;
+  }
+  .record-card .defecto{ margin-top:5px; font-size:13px; }
+  .record-card .causante{ color:var(--ink-soft); font-size:12px; margin-top:2px; }
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--ink-soft); }
+  .empty-state .glyph{ font-size:30px; margin-bottom:10px; }
+
+  /* ---------- Tabla histórico ---------- */
+  .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+  .toolbar .search-box{ flex:1; min-width:200px; margin-bottom:0; }
+  select.filter-select{
+    font-family:inherit; font-size:13px; padding:8px 9px; border-radius:var(--radius);
+    border:1px solid var(--border-strong); background:var(--surface-2); color:var(--ink);
+  }
+  .table-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius); }
+  table.hist{ width:100%; border-collapse:collapse; font-size:13px; min-width:760px; }
+  table.hist thead th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; font-weight:600;
+    color:var(--ink-soft); background:var(--surface-2); padding:10px 12px; border-bottom:1px solid var(--border-strong);
+    cursor:pointer; white-space:nowrap; user-select:none;
+  }
+  table.hist thead th:hover{ color:var(--ink); }
+  table.hist thead th .arrow{ opacity:.5; margin-left:3px; font-size:10px; }
+  table.hist tbody td{ padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  table.hist tbody tr:hover{ background:var(--surface-2); }
+  table.hist td.num-cell{ font-family:'IBM Plex Mono'; font-weight:600; white-space:nowrap; }
+  table.hist td.date-cell{ font-family:'IBM Plex Mono'; white-space:nowrap; color:var(--ink-soft); }
+  table.hist td.obs-cell{ max-width:220px; color:var(--ink-soft); }
+  .row-actions{ display:flex; gap:6px; white-space:nowrap; }
+  .icon-btn{
+    background:none; border:1px solid var(--border-strong); border-radius:4px; cursor:pointer;
+    padding:4px 7px; font-size:12px; color:var(--ink-soft);
+  }
+  .icon-btn:hover{ color:var(--ink); border-color:var(--ink); }
+  .icon-btn.danger:hover{ color:var(--flag); border-color:var(--flag); }
+  .hist-footer{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:12px; color:var(--ink-soft); }
+
+  /* ---------- Informe ---------- */
+  .report-filters{
+    display:flex; gap:22px; flex-wrap:wrap; align-items:flex-end; margin-bottom:22px;
+    padding-bottom:18px; border-bottom:1px solid var(--border);
+  }
+  .filter-group label{ display:block; font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em; }
+  .area-chips{ display:flex; gap:6px; flex-wrap:wrap; max-width:420px; }
+  .chip{
+    font-size:12px; padding:5px 11px; border-radius:20px; border:1px solid var(--border-strong);
+    background:var(--surface-2); cursor:pointer; color:var(--ink-soft); transition:all .12s ease;
+  }
+  .chip.active{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600; }
+  .date-range{ display:flex; gap:8px; align-items:center; }
+  .date-range input{ font-family:'IBM Plex Mono'; font-size:12.5px; padding:7px 8px; border:1px solid var(--border-strong); border-radius:5px; background:var(--surface-2); color:var(--ink); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px; }
+  @media (max-width:760px){ .kpi-row{ grid-template-columns:1fr 1fr; } }
+  .kpi{ border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:4px; padding:14px 16px; background:var(--surface-2); }
+  .kpi .kpi-num{ font-family:'IBM Plex Mono'; font-size:24px; font-weight:600; line-height:1; }
+  .kpi .kpi-lbl{ font-size:11.5px; color:var(--ink-soft); margin-top:6px; }
+  .kpi .kpi-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; font-family:'IBM Plex Mono'; }
+
+  .charts-row{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:28px; }
+  @media (max-width:860px){ .charts-row{ grid-template-columns:1fr; } }
+  .chart-card{ border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px 8px; background:var(--surface); }
+  .chart-card h3{ font-size:12.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); margin:0 0 14px; font-weight:700; }
+  .chart-card .chart-holder{ position:relative; height:230px; }
+  .chart-card.wide{ grid-column:1 / -1; }
+  .chart-card.wide .chart-holder{ height:210px; }
+
+  .countermeasures{ margin-top:6px; }
+  .cm-item{ border:1px solid var(--border); border-radius:var(--radius); margin-bottom:12px; overflow:hidden; }
+  .cm-head{ display:flex; justify-content:space-between; align-items:center; padding:11px 14px; background:var(--surface-2); }
+  .cm-head .area-name{ font-weight:700; font-size:13.5px; }
+  .cm-head .count-badge{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-soft); }
+  .cm-body{ padding:12px 14px; }
+  .cm-body textarea{
+    width:100%; min-height:60px; font-family:inherit; font-size:13px; border:1px solid var(--border-strong);
+    border-radius:5px; padding:8px 9px; background:var(--surface-2); color:var(--ink); resize:vertical;
+  }
+  .cm-body textarea:focus{ outline:none; border-color:var(--accent); background:var(--surface); }
+  .cm-body .save-hint{ font-size:11px; color:var(--ink-soft); margin-top:5px; }
+  .cm-top-defects{ font-size:12px; color:var(--ink-soft); margin-top:8px; }
+  .cm-top-defects b{ color:var(--ink); font-weight:600; }
+
+  ::-webkit-scrollbar{ width:9px; height:9px; }
+  ::-webkit-scrollbar-thumb{ background:var(--border-strong); border-radius:5px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+
+  @media (prefers-reduced-motion: reduce){
+    .panel.active{ animation:none; }
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">🛠️</div>
+      <div>
+        <h1>Registro de Garantías</h1>
+        <p>Control de defectos y seguimiento por área</p>
+      </div>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat">
+        <div class="num mono" id="statTotal">0</div>
+        <div class="lbl">Total registradas</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" id="statMonth">0</div>
+        <div class="lbl">Este mes</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" id="statAreas">0</div>
+        <div class="lbl">Áreas activas</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="registro"><span class="n">01</span> Consultar / Registrar</button>
+    <button class="tab-btn" data-tab="historico"><span class="n">02</span> Histórico</button>
+    <button class="tab-btn" data-tab="informe"><span class="n">03</span> Informe interactivo</button>
+  </nav>
+
+  <main class="sheet">
+
+    <!-- ===================== TAB 1: REGISTRO / CONSULTA ===================== -->
+    <section class="panel active" id="panel-registro">
+      <div class="grid-2">
+        <div>
+          <h2 class="section-title">Nueva garantía</h2>
+          <p class="section-sub">Completa los datos del defecto reportado.</p>
+
+          <div class="edit-banner" id="editBanner">
+            <span>✎ Editando garantía <strong id="editingNum"></strong></span>
+            <button class="btn btn-small btn-ghost" id="cancelEdit" type="button">Cancelar edición</button>
+          </div>
+
+          <form id="garantiaForm" novalidate>
+            <div class="field-row">
+              <div class="field">
+                <label>Fecha de ingreso <span class="req">*</span></label>
+                <input type="date" id="fecha" required>
+              </div>
+              <div class="field">
+                <label>Fecha de fabricación</label>
+                <input type="date" id="fechaFabricacion">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Número de garantía <span class="req">*</span></label>
+                <input type="text" id="numero" placeholder="Ej. GAR-2026-0001" required>
+              </div>
+              <div class="field">
+                <label>Número de pedido</label>
+                <input type="text" id="numeroPedido" placeholder="Ej. PED-4821">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Tipo de garantía <span class="req">*</span></label>
+                <input type="text" id="tipoGarantia" list="tipoList" placeholder="Ej. Cambio, Reproceso, Reembolso..." required>
+                <datalist id="tipoList"></datalist>
+              </div>
+              <div class="field">
+                <label>Área <span class="req">*</span></label>
+                <input type="text" id="area" list="areaList" placeholder="Ej. Ensamble, Pintura, Corte..." required>
+                <datalist id="areaList"></datalist>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Línea de producción</label>
+                <input type="text" id="lineaProduccion" list="lineaList" placeholder="Ej. Línea 1, Línea 2...">
+                <datalist id="lineaList"></datalist>
+              </div>
+              <div class="field">
+                <label>Ciudad</label>
+                <input type="text" id="ciudad" list="ciudadList" placeholder="Ciudad de origen del pedido">
+                <datalist id="ciudadList"></datalist>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Causante <span class="req">*</span></label>
+              <input type="text" id="causante" list="causanteList" placeholder="Persona, máquina o proceso" required>
+              <datalist id="causanteList"></datalist>
+            </div>
+
+            <div class="field">
+              <label>Defecto <span class="req">*</span></label>
+              <input type="text" id="defecto" list="defectoList" placeholder="Descripción breve del defecto" required>
+              <datalist id="defectoList"></datalist>
+            </div>
+
+            <div class="field">
+              <label>Observaciones</label>
+              <textarea id="observaciones" placeholder="Detalles adicionales, condiciones, evidencia, etc."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn">Registrar garantía</button>
+              <button type="reset" class="btn btn-ghost" id="clearBtn">Limpiar</button>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <h2 class="section-title">Consultar garantías</h2>
+          <p class="section-sub">Busca por número, área, causante o defecto.</p>
+          <div class="search-box">
+            <input type="text" id="quickSearch" placeholder="Buscar...">
+          </div>
+          <div class="record-list" id="recordList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 2: HISTORICO ===================== -->
+    <section class="panel" id="panel-historico">
+      <h2 class="section-title">Histórico de garantías</h2>
+      <p class="section-sub">Todas las garantías registradas. Haz clic en un encabezado para ordenar.</p>
+
+      <div class="toolbar">
+        <div class="search-box"><input type="text" id="histSearch" placeholder="Buscar en el histórico..."></div>
+        <select class="filter-select" id="histAreaFilter"><option value="">Todas las áreas</option></select>
+        <select class="filter-select" id="histTipoFilter"><option value="">Todos los tipos</option></select>
+        <select class="filter-select" id="histLineaFilter"><option value="">Todas las líneas</option></select>
+        <select class="filter-select" id="histCiudadFilter"><option value="">Todas las ciudades</option></select>
+        <button class="btn btn-ghost btn-small" id="exportCsv" type="button">Exportar CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="hist">
+          <thead>
+            <tr>
+              <th data-key="fecha">Fecha ingreso <span class="arrow"></span></th>
+              <th data-key="fechaFabricacion">Fecha fabric. <span class="arrow"></span></th>
+              <th data-key="numero">N° Garantía <span class="arrow"></span></th>
+              <th data-key="numeroPedido">N° Pedido <span class="arrow"></span></th>
+              <th data-key="tipoGarantia">Tipo <span class="arrow"></span></th>
+              <th data-key="area">Área <span class="arrow"></span></th>
+              <th data-key="lineaProduccion">Línea <span class="arrow"></span></th>
+              <th data-key="ciudad">Ciudad <span class="arrow"></span></th>
+              <th data-key="causante">Causante <span class="arrow"></span></th>
+              <th data-key="defecto">Defecto <span class="arrow"></span></th>
+              <th>Observaciones</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="histBody"></tbody>
+        </table>
+      </div>
+      <div class="hist-footer">
+        <span id="histCount">0 registros</span>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 3: INFORME ===================== -->
+    <section class="panel" id="panel-informe">
+      <h2 class="section-title">Informe interactivo por área</h2>
+      <p class="section-sub">Filtra por área y periodo para identificar patrones y definir contramedidas.</p>
+
+      <div class="report-filters">
+        <div class="filter-group">
+          <label>Áreas</label>
+          <div class="area-chips" id="areaChips"></div>
+        </div>
+        <div class="filter-group">
+          <label>Periodo (fecha de ingreso)</label>
+          <div class="date-range">
+            <input type="date" id="repFrom">
+            <span class="mono" style="color:var(--ink-soft); font-size:12px;">a</span>
+            <input type="date" id="repTo">
+          </div>
+        </div>
+        <div class="filter-group">
+          <label>Tipo de garantía</label>
+          <select class="filter-select" id="repTipoFilter"><option value="">Todos</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Línea de producción</label>
+          <select class="filter-select" id="repLineaFilter"><option value="">Todas</option></select>
+        </div>
+        <div class="filter-group">
+          <label>Ciudad</label>
+          <select class="filter-select" id="repCiudadFilter"><option value="">Todas</option></select>
+        </div>
+        <div class="filter-group">
+          <button class="btn btn-ghost btn-small" id="repReset" type="button">Restablecer filtros</button>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-num mono" id="kpiTotal">0</div>
+          <div class="kpi-lbl">Garantías en el periodo filtrado</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-num mono" id="kpiTopArea">–</div>
+          <div class="kpi-lbl">Área con más incidencias</div>
+          <div class="kpi-sub" id="kpiTopAreaCount"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-num mono" id="kpiTopDefecto">–</div>
+          <div class="kpi-lbl">Defecto más frecuente</div>
+          <div class="kpi-sub" id="kpiTopDefectoCount"></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-num mono" id="kpiTopCausante">–</div>
+          <div class="kpi-lbl">Causante más recurrente</div>
+          <div class="kpi-sub" id="kpiTopCausanteCount"></div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <h3>Garantías por área</h3>
+          <div class="chart-holder"><canvas id="chartArea"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Top defectos</h3>
+          <div class="chart-holder"><canvas id="chartDefecto"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Garantías por línea de producción</h3>
+          <div class="chart-holder"><canvas id="chartLinea"></canvas></div>
+        </div>
+        <div class="chart-card wide">
+          <h3>Tendencia mensual</h3>
+          <div class="chart-holder"><canvas id="chartTrend"></canvas></div>
+        </div>
+      </div>
+
+      <h2 class="section-title" style="margin-top:6px;">Plan de contramedidas por área</h2>
+      <p class="section-sub">Documenta la acción correctiva definida para cada área con incidencias. Se guarda automáticamente.</p>
+      <div class="countermeasures" id="countermeasures"></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "garantias_registro_v1";
+  var CM_KEY = "garantias_contramedidas_v1";
+
+  // ---------- Persistence helpers ----------
+  function loadRecords(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function saveRecords(list){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+  }
+  function loadCM(){
+    try{
+      var raw = localStorage.getItem(CM_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveCM(obj){
+    try{ localStorage.setItem(CM_KEY, JSON.stringify(obj)); }catch(e){}
+  }
+
+  var records = loadRecords();
+  var countermeasures = loadCM();
+  var editingId = null;
+  var histSort = { key: "fecha", dir: "desc" };
+  var reportAreaSel = new Set();
+
+  var charts = { area:null, defecto:null, trend:null, linea:null };
+
+  function uid(){ return "g" + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+  function fmtDate(s){
+    if(!s) return "";
+    var p = s.split("-");
+    if(p.length!==3) return s;
+    return p[2] + "/" + p[1] + "/" + p[0];
+  }
+  function escapeHtml(str){
+    return String(str==null?"":str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function showToast(msg){
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(showToast._tm);
+    showToast._tm = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  // ---------- Tabs ----------
+  var tabButtons = document.querySelectorAll(".tab-btn");
+  var panels = { registro: document.getElementById("panel-registro"),
+                 historico: document.getElementById("panel-historico"),
+                 informe: document.getElementById("panel-informe") };
+
+  tabButtons.forEach(function(btn){
+    btn.addEventListener("click", function(){ activateTab(btn.dataset.tab); });
+  });
+  function activateTab(name){
+    tabButtons.forEach(function(b){ b.classList.toggle("active", b.dataset.tab===name); });
+    Object.keys(panels).forEach(function(k){ panels[k].classList.toggle("active", k===name); });
+    if(name==="informe"){ renderReport(); }
+  }
+
+  // ---------- Form ----------
+  var form = document.getElementById("garantiaForm");
+  var fFecha = document.getElementById("fecha");
+  var fFechaFab = document.getElementById("fechaFabricacion");
+  var fNumero = document.getElementById("numero");
+  var fNumeroPedido = document.getElementById("numeroPedido");
+  var fTipo = document.getElementById("tipoGarantia");
+  var fArea = document.getElementById("area");
+  var fLinea = document.getElementById("lineaProduccion");
+  var fCiudad = document.getElementById("ciudad");
+  var fCausante = document.getElementById("causante");
+  var fDefecto = document.getElementById("defecto");
+  var fObs = document.getElementById("observaciones");
+  var submitBtn = document.getElementById("submitBtn");
+  var editBanner = document.getElementById("editBanner");
+  var editingNumEl = document.getElementById("editingNum");
+
+  fFecha.value = todayStr();
+
+  document.getElementById("clearBtn").addEventListener("click", function(){
+    setTimeout(function(){ fFecha.value = todayStr(); exitEditMode(); }, 0);
+  });
+
+  document.getElementById("cancelEdit").addEventListener("click", function(){
+    exitEditMode();
+    form.reset();
+    fFecha.value = todayStr();
+  });
+
+  function enterEditMode(rec){
+    editingId = rec.id;
+    fFecha.value = rec.fecha;
+    fFechaFab.value = rec.fechaFabricacion || "";
+    fNumero.value = rec.numero;
+    fNumeroPedido.value = rec.numeroPedido || "";
+    fTipo.value = rec.tipoGarantia || "";
+    fArea.value = rec.area;
+    fLinea.value = rec.lineaProduccion || "";
+    fCiudad.value = rec.ciudad || "";
+    fCausante.value = rec.causante;
+    fDefecto.value = rec.defecto;
+    fObs.value = rec.observaciones || "";
+    submitBtn.textContent = "Actualizar garantía";
+    editBanner.classList.add("show");
+    editingNumEl.textContent = rec.numero;
+    activateTab("registro");
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function exitEditMode(){
+    editingId = null;
+    submitBtn.textContent = "Registrar garantía";
+    editBanner.classList.remove("show");
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var vals = {
+      fecha: fFecha.value,
+      fechaFabricacion: fFechaFab.value,
+      numero: fNumero.value.trim(),
+      numeroPedido: fNumeroPedido.value.trim(),
+      tipoGarantia: fTipo.value.trim(),
+      area: fArea.value.trim(),
+      lineaProduccion: fLinea.value.trim(),
+      ciudad: fCiudad.value.trim(),
+      causante: fCausante.value.trim(),
+      defecto: fDefecto.value.trim(),
+      observaciones: fObs.value.trim()
+    };
+    if(!vals.fecha || !vals.numero || !vals.tipoGarantia || !vals.area || !vals.causante || !vals.defecto){
+      showToast("Completa los campos obligatorios (*)");
+      return;
+    }
+
+    if(editingId){
+      var idx = records.findIndex(function(r){ return r.id===editingId; });
+      if(idx>-1){
+        records[idx] = Object.assign({}, records[idx], vals);
+        showToast("Garantía " + vals.numero + " actualizada");
+      }
+      exitEditMode();
+    } else {
+      var dup = records.some(function(r){ return r.numero.toLowerCase()===vals.numero.toLowerCase(); });
+      if(dup && !confirm('Ya existe una garantía con el número "' + vals.numero + '". ¿Registrar de todas formas?')){
+        return;
+      }
+      vals.id = uid();
+      vals.createdAt = Date.now();
+      records.unshift(vals);
+      showToast("Garantía " + vals.numero + " registrada");
+    }
+
+    saveRecords(records);
+    form.reset();
+    fFecha.value = todayStr();
+    refreshAll();
+  });
+
+  // ---------- Datalists (autocomplete from history) ----------
+  function refreshDatalists(){
+    function fill(id, key){
+      var el = document.getElementById(id);
+      var vals = Array.from(new Set(records.map(function(r){ return r[key]; }).filter(Boolean)));
+      el.innerHTML = vals.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join("");
+    }
+    fill("areaList","area");
+    fill("causanteList","causante");
+    fill("defectoList","defecto");
+    fill("tipoList","tipoGarantia");
+    fill("lineaList","lineaProduccion");
+    fill("ciudadList","ciudad");
+  }
+
+  // ---------- Tab 1: consulta list ----------
+  var quickSearch = document.getElementById("quickSearch");
+  quickSearch.addEventListener("input", renderRecordList);
+
+  function renderRecordList(){
+    var q = quickSearch.value.trim().toLowerCase();
+    var list = records;
+    if(q){
+      list = records.filter(function(r){
+        return (r.numero+" "+r.numeroPedido+" "+r.tipoGarantia+" "+r.area+" "+r.lineaProduccion+" "+r.ciudad+" "+r.causante+" "+r.defecto+" "+(r.observaciones||"")).toLowerCase().indexOf(q) > -1;
+      });
+    }
+    var host = document.getElementById("recordList");
+    if(list.length===0){
+      host.innerHTML = '<div class="empty-state"><div class="glyph">🗂️</div>' +
+        (records.length===0 ? 'Aún no hay garantías registradas.' : 'Sin resultados para tu búsqueda.') + '</div>';
+      return;
+    }
+    host.innerHTML = list.slice(0,200).map(function(r){
+      var metaBits = [];
+      if(r.numeroPedido) metaBits.push("Pedido " + r.numeroPedido);
+      if(r.lineaProduccion) metaBits.push(r.lineaProduccion);
+      if(r.ciudad) metaBits.push(r.ciudad);
+      return '<div class="record-card" data-id="'+r.id+'">' +
+        '<div class="top-row"><span class="num mono">'+escapeHtml(r.numero)+'</span><span class="date mono">'+fmtDate(r.fecha)+'</span></div>' +
+        '<span class="area-pill">'+escapeHtml(r.area)+'</span>' +
+        (r.tipoGarantia ? ' <span class="area-pill" style="background:var(--warn); color:#3a2a05;">'+escapeHtml(r.tipoGarantia)+'</span>' : '') +
+        '<div class="defecto">'+escapeHtml(r.defecto)+'</div>' +
+        '<div class="causante">Causante: '+escapeHtml(r.causante)+'</div>' +
+        (metaBits.length ? '<div class="causante">'+escapeHtml(metaBits.join(" · "))+'</div>' : '') +
+        '</div>';
+    }).join("");
+    Array.from(host.querySelectorAll(".record-card")).forEach(function(card){
+      card.addEventListener("click", function(){
+        var rec = records.find(function(r){ return r.id===card.dataset.id; });
+        if(rec) enterEditMode(rec);
+      });
+    });
+  }
+
+  // ---------- Tab 2: histórico ----------
+  var histSearch = document.getElementById("histSearch");
+  var histAreaFilter = document.getElementById("histAreaFilter");
+  var histTipoFilter = document.getElementById("histTipoFilter");
+  var histLineaFilter = document.getElementById("histLineaFilter");
+  var histCiudadFilter = document.getElementById("histCiudadFilter");
+  histSearch.addEventListener("input", renderHistorico);
+  histAreaFilter.addEventListener("change", renderHistorico);
+  histTipoFilter.addEventListener("change", renderHistorico);
+  histLineaFilter.addEventListener("change", renderHistorico);
+  histCiudadFilter.addEventListener("change", renderHistorico);
+
+  document.querySelectorAll("table.hist thead th[data-key]").forEach(function(th){
+    th.addEventListener("click", function(){
+      var key = th.dataset.key;
+      if(histSort.key===key){ histSort.dir = histSort.dir==="asc" ? "desc" : "asc"; }
+      else { histSort.key = key; histSort.dir = "asc"; }
+      renderHistorico();
+    });
+  });
+
+  function fillSelectOptions(selectEl, key, placeholderLabel){
+    var vals = Array.from(new Set(records.map(function(r){ return r[key]; }).filter(Boolean))).sort();
+    var current = selectEl.value;
+    selectEl.innerHTML = '<option value="">'+placeholderLabel+'</option>' +
+      vals.map(function(v){ return '<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>'; }).join("");
+    if(vals.indexOf(current)>-1) selectEl.value = current;
+  }
+
+  function refreshAreaFilterOptions(){
+    fillSelectOptions(histAreaFilter, "area", "Todas las áreas");
+    fillSelectOptions(histTipoFilter, "tipoGarantia", "Todos los tipos");
+    fillSelectOptions(histLineaFilter, "lineaProduccion", "Todas las líneas");
+    fillSelectOptions(histCiudadFilter, "ciudad", "Todas las ciudades");
+    fillSelectOptions(document.getElementById("repTipoFilter"), "tipoGarantia", "Todos");
+    fillSelectOptions(document.getElementById("repLineaFilter"), "lineaProduccion", "Todas");
+    fillSelectOptions(document.getElementById("repCiudadFilter"), "ciudad", "Todas");
+  }
+
+  function renderHistorico(){
+    document.querySelectorAll("table.hist thead th[data-key] .arrow").forEach(function(a){ a.textContent=""; });
+    var activeTh = document.querySelector('table.hist thead th[data-key="'+histSort.key+'"] .arrow');
+    if(activeTh) activeTh.textContent = histSort.dir==="asc" ? "▲" : "▼";
+
+    var q = histSearch.value.trim().toLowerCase();
+    var areaF = histAreaFilter.value;
+    var tipoF = histTipoFilter.value;
+    var lineaF = histLineaFilter.value;
+    var ciudadF = histCiudadFilter.value;
+    var list = records.filter(function(r){
+      if(areaF && r.area!==areaF) return false;
+      if(tipoF && r.tipoGarantia!==tipoF) return false;
+      if(lineaF && r.lineaProduccion!==lineaF) return false;
+      if(ciudadF && r.ciudad!==ciudadF) return false;
+      if(q && (r.numero+" "+r.numeroPedido+" "+r.tipoGarantia+" "+r.area+" "+r.lineaProduccion+" "+r.ciudad+" "+r.causante+" "+r.defecto+" "+(r.observaciones||"")).toLowerCase().indexOf(q)===-1) return false;
+      return true;
+    });
+    list = list.slice().sort(function(a,b){
+      var va = (a[histSort.key]||"").toString().toLowerCase();
+      var vb = (b[histSort.key]||"").toString().toLowerCase();
+      if(va<vb) return histSort.dir==="asc" ? -1 : 1;
+      if(va>vb) return histSort.dir==="asc" ? 1 : -1;
+      return 0;
+    });
+
+    var body = document.getElementById("histBody");
+    if(list.length===0){
+      body.innerHTML = '<tr><td colspan="12" style="text-align:center; color:var(--ink-soft); padding:36px;">Sin registros que coincidan.</td></tr>';
+    } else {
+      body.innerHTML = list.map(function(r){
+        return '<tr>' +
+          '<td class="date-cell">'+fmtDate(r.fecha)+'</td>' +
+          '<td class="date-cell">'+(r.fechaFabricacion ? fmtDate(r.fechaFabricacion) : "—")+'</td>' +
+          '<td class="num-cell">'+escapeHtml(r.numero)+'</td>' +
+          '<td class="num-cell">'+escapeHtml(r.numeroPedido||"—")+'</td>' +
+          '<td>'+escapeHtml(r.tipoGarantia||"—")+'</td>' +
+          '<td>'+escapeHtml(r.area)+'</td>' +
+          '<td>'+escapeHtml(r.lineaProduccion||"—")+'</td>' +
+          '<td>'+escapeHtml(r.ciudad||"—")+'</td>' +
+          '<td>'+escapeHtml(r.causante)+'</td>' +
+          '<td>'+escapeHtml(r.defecto)+'</td>' +
+          '<td class="obs-cell">'+escapeHtml(r.observaciones||"—")+'</td>' +
+          '<td><div class="row-actions">' +
+            '<button class="icon-btn" data-act="edit" data-id="'+r.id+'" title="Editar">✎</button>' +
+            '<button class="icon-btn danger" data-act="del" data-id="'+r.id+'" title="Eliminar">✕</button>' +
+          '</div></td>' +
+        '</tr>';
+      }).join("");
+    }
+    document.getElementById("histCount").textContent = list.length + (list.length===1 ? " registro" : " registros") +
+      (records.length!==list.length ? " (de " + records.length + " en total)" : "");
+
+    Array.from(body.querySelectorAll('button[data-act="edit"]')).forEach(function(b){
+      b.addEventListener("click", function(){
+        var rec = records.find(function(r){ return r.id===b.dataset.id; });
+        if(rec) enterEditMode(rec);
+      });
+    });
+    Array.from(body.querySelectorAll('button[data-act="del"]')).forEach(function(b){
+      b.addEventListener("click", function(){
+        var rec = records.find(function(r){ return r.id===b.dataset.id; });
+        if(!rec) return;
+        if(confirm('¿Eliminar la garantía "'+rec.numero+'"? Esta acción no se puede deshacer.')){
+          records = records.filter(function(r){ return r.id!==rec.id; });
+          saveRecords(records);
+          if(editingId===rec.id){ exitEditMode(); form.reset(); fFecha.value = todayStr(); }
+          showToast("Garantía eliminada");
+          refreshAll();
+        }
+      });
+    });
+  }
+
+  document.getElementById("exportCsv").addEventListener("click", function(){
+    if(records.length===0){ showToast("No hay datos para exportar"); return; }
+    var header = ["Fecha ingreso","Fecha fabricacion","Numero garantia","Numero pedido","Tipo garantia","Area","Linea produccion","Ciudad","Causante","Defecto","Observaciones"];
+    var rows = records.map(function(r){
+      return [r.fecha, r.fechaFabricacion||"", r.numero, r.numeroPedido||"", r.tipoGarantia||"", r.area, r.lineaProduccion||"", r.ciudad||"", r.causante, r.defecto, (r.observaciones||"").replace(/\n/g," ")];
+    });
+    var csv = [header].concat(rows).map(function(row){
+      return row.map(function(cell){
+        var c = String(cell==null?"":cell);
+        if(c.indexOf(",")>-1 || c.indexOf('"')>-1 || c.indexOf("\n")>-1){
+          c = '"' + c.replace(/"/g,'""') + '"';
+        }
+        return c;
+      }).join(",");
+    }).join("\n");
+    var blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "historico_garantias_" + todayStr() + ".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- Tab 3: informe ----------
+  var repFrom = document.getElementById("repFrom");
+  var repTo = document.getElementById("repTo");
+  var repTipoFilter = document.getElementById("repTipoFilter");
+  var repLineaFilter = document.getElementById("repLineaFilter");
+  var repCiudadFilter = document.getElementById("repCiudadFilter");
+  repFrom.addEventListener("change", renderReport);
+  repTo.addEventListener("change", renderReport);
+  repTipoFilter.addEventListener("change", renderReport);
+  repLineaFilter.addEventListener("change", renderReport);
+  repCiudadFilter.addEventListener("change", renderReport);
+  document.getElementById("repReset").addEventListener("click", function(){
+    reportAreaSel.clear();
+    repFrom.value = ""; repTo.value = "";
+    repTipoFilter.value = ""; repLineaFilter.value = ""; repCiudadFilter.value = "";
+    renderReport();
+  });
+
+  function refreshAreaChips(){
+    var areas = Array.from(new Set(records.map(function(r){ return r.area; }).filter(Boolean))).sort();
+    var host = document.getElementById("areaChips");
+    if(areas.length===0){
+      host.innerHTML = '<span style="font-size:12px;color:var(--ink-soft);">Sin áreas registradas aún</span>';
+      return;
+    }
+    host.innerHTML = areas.map(function(a){
+      var active = reportAreaSel.has(a) ? " active" : "";
+      return '<button type="button" class="chip'+active+'" data-area="'+escapeHtml(a)+'">'+escapeHtml(a)+'</button>';
+    }).join("");
+    Array.from(host.querySelectorAll(".chip")).forEach(function(chip){
+      chip.addEventListener("click", function(){
+        var a = chip.dataset.area;
+        if(reportAreaSel.has(a)) reportAreaSel.delete(a); else reportAreaSel.add(a);
+        renderReport();
+      });
+    });
+  }
+
+  function filteredForReport(){
+    return records.filter(function(r){
+      if(reportAreaSel.size>0 && !reportAreaSel.has(r.area)) return false;
+      if(repFrom.value && r.fecha < repFrom.value) return false;
+      if(repTo.value && r.fecha > repTo.value) return false;
+      if(repTipoFilter.value && r.tipoGarantia!==repTipoFilter.value) return false;
+      if(repLineaFilter.value && r.lineaProduccion!==repLineaFilter.value) return false;
+      if(repCiudadFilter.value && r.ciudad!==repCiudadFilter.value) return false;
+      return true;
+    });
+  }
+
+  function topOf(list, key){
+    var counts = {};
+    list.forEach(function(r){ var k=r[key]||"—"; counts[k]=(counts[k]||0)+1; });
+    var arr = Object.keys(counts).map(function(k){ return {key:k, count:counts[k]}; });
+    arr.sort(function(a,b){ return b.count-a.count; });
+    return arr;
+  }
+
+  function chartColors(n){
+    var base = ["#1F6F63","#C98A2C","#9C4221","#3D6B8C","#6B8F1F","#7A4FA5","#B0455C","#4F8AA5"];
+    var out = [];
+    for(var i=0;i<n;i++) out.push(base[i % base.length]);
+    return out;
+  }
+
+  function renderReport(){
+    refreshAreaChips();
+    var list = filteredForReport();
+
+    document.getElementById("kpiTotal").textContent = list.length;
+
+    var byArea = topOf(list, "area");
+    var byDefecto = topOf(list, "defecto");
+    var byCausante = topOf(list, "causante");
+
+    document.getElementById("kpiTopArea").textContent = byArea[0] ? byArea[0].key : "–";
+    document.getElementById("kpiTopAreaCount").textContent = byArea[0] ? byArea[0].count + " garantías" : "";
+    document.getElementById("kpiTopDefecto").textContent = byDefecto[0] ? byDefecto[0].key : "–";
+    document.getElementById("kpiTopDefectoCount").textContent = byDefecto[0] ? byDefecto[0].count + " casos" : "";
+    document.getElementById("kpiTopCausante").textContent = byCausante[0] ? byCausante[0].key : "–";
+    document.getElementById("kpiTopCausanteCount").textContent = byCausante[0] ? byCausante[0].count + " casos" : "";
+
+    var gridColor = getComputedStyle(document.body).getPropertyValue("--border").trim();
+    var inkColor = getComputedStyle(document.body).getPropertyValue("--ink-soft").trim();
+    Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+    Chart.defaults.font.size = 11.5;
+    Chart.defaults.color = inkColor;
+
+    // Chart: por área
+    var areaLabels = byArea.map(function(x){return x.key;});
+    var areaData = byArea.map(function(x){return x.count;});
+    if(charts.area) charts.area.destroy();
+    charts.area = new Chart(document.getElementById("chartArea"), {
+      type:"bar",
+      data:{ labels:areaLabels, datasets:[{ data:areaData, backgroundColor: chartColors(areaLabels.length), borderRadius:3, maxBarThickness:34 }] },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return ctx.parsed.y + " garantía(s)"; } } } },
+        scales:{ y:{ beginAtZero:true, ticks:{precision:0}, grid:{color:gridColor} }, x:{ grid:{display:false} } }
+      }
+    });
+
+    // Chart: top defectos (horizontal)
+    var topDef = byDefecto.slice(0,8);
+    if(charts.defecto) charts.defecto.destroy();
+    charts.defecto = new Chart(document.getElementById("chartDefecto"), {
+      type:"bar",
+      data:{ labels: topDef.map(function(x){return x.key;}), datasets:[{ data: topDef.map(function(x){return x.count;}), backgroundColor:"#9C4221", borderRadius:3, maxBarThickness:18 }] },
+      options:{
+        indexAxis:"y", responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return ctx.parsed.x + " caso(s)"; } } } },
+        scales:{ x:{ beginAtZero:true, ticks:{precision:0}, grid:{color:gridColor} }, y:{ grid:{display:false} } }
+      }
+    });
+
+    // Chart: por línea de producción
+    var byLinea = topOf(list, "lineaProduccion");
+    var lineaLabels = byLinea.map(function(x){return x.key;});
+    var lineaData = byLinea.map(function(x){return x.count;});
+    if(charts.linea) charts.linea.destroy();
+    charts.linea = new Chart(document.getElementById("chartLinea"), {
+      type:"bar",
+      data:{ labels:lineaLabels, datasets:[{ data:lineaData, backgroundColor: chartColors(lineaLabels.length).reverse(), borderRadius:3, maxBarThickness:34 }] },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return ctx.parsed.y + " garantía(s)"; } } } },
+        scales:{ y:{ beginAtZero:true, ticks:{precision:0}, grid:{color:gridColor} }, x:{ grid:{display:false} } }
+      }
+    });
+
+    // Chart: tendencia mensual
+    var months = {};
+    list.forEach(function(r){
+      if(!r.fecha) return;
+      var m = r.fecha.slice(0,7);
+      months[m] = (months[m]||0)+1;
+    });
+    var monthKeys = Object.keys(months).sort();
+    if(charts.trend) charts.trend.destroy();
+    charts.trend = new Chart(document.getElementById("chartTrend"), {
+      type:"line",
+      data:{
+        labels: monthKeys,
+        datasets:[{ data: monthKeys.map(function(k){return months[k];}), borderColor:"#1F6F63", backgroundColor:"rgba(31,111,99,0.12)",
+          fill:true, tension:0.25, pointRadius:3, pointBackgroundColor:"#1F6F63" }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false} },
+        scales:{ y:{ beginAtZero:true, ticks:{precision:0}, grid:{color:gridColor} }, x:{ grid:{display:false} } }
+      }
+    });
+
+    renderCountermeasures(list, byArea);
+  }
+
+  function renderCountermeasures(list, byArea){
+    var host = document.getElementById("countermeasures");
+    if(byArea.length===0){
+      host.innerHTML = '<div class="empty-state"><div class="glyph">📋</div>Registra garantías para comenzar a documentar contramedidas por área.</div>';
+      return;
+    }
+    host.innerHTML = byArea.map(function(a){
+      var areaRecords = list.filter(function(r){ return r.area===a.key; });
+      var defs = topOf(areaRecords, "defecto").slice(0,3).map(function(d){ return d.key + " ("+d.count+")"; }).join(", ");
+      var saved = countermeasures[a.key] || "";
+      return '<div class="cm-item">' +
+        '<div class="cm-head"><span class="area-name">'+escapeHtml(a.key)+'</span><span class="count-badge">'+a.count+' garantía(s)</span></div>' +
+        '<div class="cm-body">' +
+          '<div class="cm-top-defects">Defectos más frecuentes: <b>'+escapeHtml(defs||"—")+'</b></div>' +
+          '<label style="display:block;font-size:11px;font-weight:600;color:var(--ink-soft);margin:10px 0 5px;">Contramedida / acción correctiva definida</label>' +
+          '<textarea data-area="'+escapeHtml(a.key)+'" placeholder="Ej. Reentrenamiento del personal, ajuste de proceso, cambio de proveedor...">'+escapeHtml(saved)+'</textarea>' +
+          '<div class="save-hint">Se guarda automáticamente al salir del campo</div>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+
+    Array.from(host.querySelectorAll("textarea")).forEach(function(ta){
+      ta.addEventListener("blur", function(){
+        countermeasures[ta.dataset.area] = ta.value;
+        saveCM(countermeasures);
+        showToast("Contramedida guardada");
+      });
+    });
+  }
+
+  // ---------- Global refresh ----------
+  function refreshStats(){
+    document.getElementById("statTotal").textContent = records.length;
+    var now = new Date();
+    var ym = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+    document.getElementById("statMonth").textContent = records.filter(function(r){ return (r.fecha||"").slice(0,7)===ym; }).length;
+    document.getElementById("statAreas").textContent = new Set(records.map(function(r){return r.area;}).filter(Boolean)).size;
+  }
+
+  function refreshAll(){
+    refreshStats();
+    refreshDatalists();
+    renderRecordList();
+    refreshAreaFilterOptions();
+    renderHistorico();
+    if(panels.informe.classList.contains("active")) renderReport();
+  }
+
+  refreshAll();
+})();
+</script>
+</body>
+</html>
