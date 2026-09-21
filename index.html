@@ -364,8 +364,14 @@
             <div class="field-row">
               <div class="field">
                 <label>Tipo de garantía <span class="req">*</span></label>
-                <input type="text" id="tipoGarantia" list="tipoList" placeholder="Ej. Cambio, Reproceso, Reembolso..." required>
-                <datalist id="tipoList"></datalist>
+                <select id="tipoGarantia" required>
+                  <option value="" disabled selected>Selecciona un tipo</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                </select>
               </div>
               <div class="field">
                 <label>Área <span class="req">*</span></label>
@@ -397,7 +403,6 @@
                   <option value="Exteriores">Exteriores</option>
                   <option value="Horizontal">Horizontal</option>
                   <option value="Motor">Motor</option>
-                  <option value="Toldo">Toldo</option>
                 </select>
               </div>
               <div class="field">
@@ -779,7 +784,6 @@
     }
     fill("causanteList","causante");
     fill("defectoList","defecto");
-    fill("tipoList","tipoGarantia");
 
     var usedCiudades = records.map(function(r){ return r.ciudad; }).filter(Boolean);
     var allCiudades = Array.from(new Set(COLOMBIA_CIUDADES.concat(usedCiudades))).sort(function(a,b){ return a.localeCompare(b,"es"); });
